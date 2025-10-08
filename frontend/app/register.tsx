@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Platform
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,6 +32,7 @@ export default function Register() {
 
     try {
       setLoading(true);
+
       const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -31,15 +40,23 @@ export default function Register() {
       });
 
       const data = await res.json();
-      if (!res.ok) {
+
+      if (res.ok && data.user) {
+        // 🟢 Registro con devolución del usuario
+        await login(data.user);
+        Alert.alert('🎉 Registro exitoso', `Bienvenido ${data.user.nombre} 👋`);
+        router.replace('/(tabs)/pedidos');
+      } else if (res.ok && !data.user) {
+        // 🟡 Registro completado pero sin devolver user (seguridad extra)
+        Alert.alert('✅ Registro completado', 'Tu cuenta fue creada correctamente. Inicia sesión para continuar.');
+        router.replace('/');
+      } else {
+        // 🔴 Error del servidor o correo duplicado
         Alert.alert('❌ Error al registrar', data.msg || 'No se pudo crear la cuenta.');
-        return;
       }
 
-      login(data.user);
-      Alert.alert('🎉 Registro exitoso', `Bienvenido ${data.user.nombre} 👋`);
-      router.replace('/(tabs)/pedidos');
-    } catch {
+    } catch (error) {
+      console.error('Error de conexión:', error);
       Alert.alert('🚫 Error de conexión', 'No se pudo conectar al servidor.');
     } finally {
       setLoading(false);
@@ -74,8 +91,14 @@ export default function Register() {
         onChangeText={setPassword}
       />
 
-      <TouchableOpacity style={styles.button} onPress={onRegister} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Registrando...' : 'Crear cuenta'}</Text>
+      <TouchableOpacity
+        style={[styles.button, loading && { opacity: 0.7 }]}
+        onPress={onRegister}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? 'Registrando...' : 'Crear cuenta'}
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.replace('/')}>
@@ -86,13 +109,32 @@ export default function Register() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#fff' },
-  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
-  input: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 10, padding: 12,
-    marginBottom: 12, backgroundColor: '#f8f9fa',
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: '#fff',
   },
-  button: { backgroundColor: '#28a745', padding: 14, borderRadius: 10, alignItems: 'center' },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: '#f8f9fa',
+  },
+  button: {
+    backgroundColor: '#28a745',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
   buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
   link: { marginTop: 16, color: '#007bff', textAlign: 'center' },
 });

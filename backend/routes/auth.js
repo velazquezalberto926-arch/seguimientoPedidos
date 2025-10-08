@@ -29,15 +29,30 @@ router.post(
         return res.status(400).json({ msg: 'Este correo ya está registrado.' });
       }
 
+      // Encriptar contraseña
       const hashedPassword = await bcrypt.hash(password, 10);
-      await pool.query(
+
+      // Insertar usuario
+      const [result] = await pool.query(
         'INSERT INTO usuario (email, password_hash, nombre, rol, esta_activo) VALUES (?, ?, ?, "cliente", 1)',
         [email, hashedPassword, nombre]
       );
 
-      res.json({ msg: 'Usuario registrado correctamente ✅' });
+      // Obtener el usuario recién creado
+      const userId = result.insertId;
+      const [newUserRows] = await pool.query(
+        'SELECT id, nombre, rol FROM usuario WHERE id = ?',
+        [userId]
+      );
+      const newUser = newUserRows[0];
+
+      // Responder con el usuario creado
+      res.json({
+        msg: 'Usuario registrado correctamente ✅',
+        user: newUser
+      });
     } catch (err) {
-      console.error(err);
+      console.error('❌ Error en registro:', err);
       res.status(500).json({ msg: 'Error del servidor. Inténtalo más tarde.' });
     }
   }
@@ -76,7 +91,7 @@ router.post(
         user: { id: user.id, nombre: user.nombre, rol: user.rol }
       });
     } catch (err) {
-      console.error(err);
+      console.error('❌ Error en login:', err);
       res.status(500).json({ msg: 'Error en el servidor.' });
     }
   }

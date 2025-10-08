@@ -7,25 +7,45 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 🔄 Cargar usuario guardado al iniciar la app
   useEffect(() => {
     const loadUser = async () => {
       try {
         const saved = await AsyncStorage.getItem('user');
-        if (saved) setUser(JSON.parse(saved));
-      } catch {}
-      setLoading(false);
+        if (saved) {
+          setUser(JSON.parse(saved));
+        }
+      } catch (error) {
+        console.error('Error cargando usuario:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     loadUser();
   }, []);
 
+  // ✅ Iniciar sesión o guardar usuario tras registro
   const login = async (userData) => {
-    setUser(userData);
-    await AsyncStorage.setItem('user', JSON.stringify(userData));
+    try {
+      if (!userData) {
+        console.warn('⚠️ Intento de guardar usuario vacío en AsyncStorage');
+        return;
+      }
+      setUser(userData);
+      await AsyncStorage.setItem('user', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Error guardando usuario:', error);
+    }
   };
 
+  // 🚪 Cerrar sesión
   const logout = async () => {
-    setUser(null);
-    await AsyncStorage.removeItem('user');
+    try {
+      setUser(null);
+      await AsyncStorage.removeItem('user');
+    } catch (error) {
+      console.error('Error eliminando usuario:', error);
+    }
   };
 
   return (
