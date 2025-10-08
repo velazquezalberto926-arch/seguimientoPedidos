@@ -10,13 +10,13 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
 
 const API_BASE =
   Platform.OS === 'web'
     ? 'http://localhost:3000'
-    : 'http://192.168.1.71:3000';
+    : 'http://192.168.1.11:3000';
 
 export default function Pedidos() {
   const { user, loading: authLoading } = useAuth();
