@@ -5,7 +5,7 @@ import { useAuth } from  '../../context/AuthContext'; // 👈 Ruta corregida par
 
 const API_BASE = Platform.OS === 'web'
   ? 'http://localhost:3000'
-  : 'http://192.168.1.71:3000'; // ⚠️ Cambia la IP a la de tu PC si usas Expo Go
+  : 'http://192.168.1.11:3000'; // ⚠️ Cambia la IP a la de tu PC si usas Expo Go
 
 export default function Login() {
   const router = useRouter();
@@ -46,7 +46,7 @@ export default function Login() {
 
       login(data.user);
       showAlert('✅ Bienvenido', `Hola ${data.user.nombre} 👋`);
-      router.replace('/(tabs)/pedidos');
+      router.replace('/pedidos');
     } catch (error) {
       showAlert('🚫 Error de conexión', 'No se pudo conectar al servidor.');
     } finally {

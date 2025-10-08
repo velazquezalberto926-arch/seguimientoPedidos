@@ -13,7 +13,7 @@ import { useAuth } from '../context/AuthContext';
 
 const API_BASE = Platform.OS === 'web'
   ? 'http://localhost:3000'
-  : 'http://192.168.1.71:3000';
+  : 'http://192.168.1.11:3000';
 
 export default function Register() {
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function Register() {
         // 🟢 Registro con devolución del usuario
         await login(data.user);
         Alert.alert('🎉 Registro exitoso', `Bienvenido ${data.user.nombre} 👋`);
-        router.replace('/(tabs)/pedidos');
+        router.replace('/pedidos');
       } else if (res.ok && !data.user) {
         // 🟡 Registro completado pero sin devolver user (seguridad extra)
         Alert.alert('✅ Registro completado', 'Tu cuenta fue creada correctamente. Inicia sesión para continuar.');
