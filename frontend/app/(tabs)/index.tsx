@@ -5,7 +5,7 @@ import { useAuth } from  '../../context/AuthContext'; // 👈 Ruta corregida par
 
 const API_BASE = Platform.OS === 'web'
   ? 'http://localhost:3000'
-  : 'http://192.168.1.71:3000'; // ⚠️ Cambia la IP a la de tu PC si usas Expo Go
+  : 'http://192.168.1.14:3000'; // ⚠️ Cambia la IP a la de tu PC si usas Expo Go
 
 export default function Login() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function Login() {
 
   const onLogin = async () => {
     if (!email || !password) {
-      showAlert('⚠️ Campos incompletos', 'Por favor llena todos los campos.');
+      showAlert('⚠️ Campos incompletos', 'Por favor llena todos los campos..');
       return;
     }
 

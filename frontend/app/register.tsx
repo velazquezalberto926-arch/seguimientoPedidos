@@ -13,7 +13,7 @@ import { useAuth } from '../context/AuthContext';
 
 const API_BASE = Platform.OS === 'web'
   ? 'http://localhost:3000'
-  : 'http://192.168.1.71:3000';
+  : 'http://192.168.1.14:3000';
 
 export default function Register() {
   const router = useRouter();
