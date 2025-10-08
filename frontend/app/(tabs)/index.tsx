@@ -26,7 +26,7 @@ export default function Login() {
 
   const onLogin = async () => {
     if (!email || !password) {
-      showAlert('⚠️ Campos incompletos', 'Por favor llena todos los campos..');
+      showAlert('⚠️ Campos incompletos', 'Por favor llena todos los campos.');
       return;
     }
 
@@ -40,7 +40,7 @@ export default function Login() {
 
       const data = await res.json();
       if (!res.ok) {
-        showAlert('❌ Error de inicio de sesión', data.msg || 'Credenciales incorrectas.');
+        showAlert('❌ Error de inicio de sesión', data.msg || 'Credenciales incorrectas, intente de nuevo.');
         return;
       }
 
