@@ -7,7 +7,6 @@ import { View, ActivityIndicator } from 'react-native';
 export default function TabsLayout() {
   const { user, loading } = useAuth();
 
-  // 🔄 Mostrar loader mientras carga sesión
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -16,14 +15,18 @@ export default function TabsLayout() {
     );
   }
 
-  // 🔓 Tabs disponibles
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#007bff',
         headerShown: false,
+        // 🔒 Oculta completamente la barra si no hay usuario
+        tabBarStyle: user
+          ? { display: 'flex' }
+          : { display: 'none' },
       }}
     >
+      {/* 🏠 Inicio o Login */}
       <Tabs.Screen
         name="index"
         options={{
@@ -33,16 +36,21 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explorar',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="compass-outline" color={color} size={size} />
-          ),
-        }}
-      />
-      {/* 👇 Solo mostrar pestaña de pedidos si el usuario está logeado */}
+
+      {/* 🧭 Explorar */}
+      {user && (
+        <Tabs.Screen
+          name="explore"
+          options={{
+            title: 'Explorar',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="compass-outline" color={color} size={size} />
+            ),
+          }}
+        />
+      )}
+
+      {/* 📦 Pedidos */}
       {user && (
         <Tabs.Screen
           name="pedidos"
