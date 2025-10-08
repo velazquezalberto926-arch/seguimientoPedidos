@@ -1,40 +1,54 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from  '../../context/AuthContext'; // 👈 Ruta corregida para web y mobile
 
-const API_BASE = 'http://172.20.10.7:3000'; // 🔹 Tu IP local + puerto 3000
+const API_BASE = Platform.OS === 'web'
+  ? 'http://localhost:3000'
+  : 'http://192.168.1.71:3000'; // ⚠️ Cambia la IP a la de tu PC si usas Expo Go
 
 export default function Login() {
   const router = useRouter();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // 💬 Mostrar alerta compatible con web y mobile
+  const showAlert = (title: string, message: string) => {
+    if (Platform.OS === 'web') {
+      window.alert(`${title}\n\n${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
+
   const onLogin = async () => {
     if (!email || !password) {
-      Alert.alert('⚠️ Campos requeridos', 'Por favor ingresa tu correo y contraseña.');
+      showAlert('⚠️ Campos incompletos', 'Por favor llena todos los campos.');
       return;
     }
 
     try {
       setLoading(true);
-
       const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
-
       if (!res.ok) {
-        Alert.alert('❌ Error al iniciar sesión', data.msg || 'Correo o contraseña incorrectos.');
+        showAlert('❌ Error de inicio de sesión', data.msg || 'Credenciales incorrectas.');
         return;
       }
 
-      Alert.alert('✅ Login exitoso', `Bienvenido ${data.user.nombre}`);
-    } catch (e: any) {
-      Alert.alert('🌐 Error de red', String(e?.message || e));
+      login(data.user);
+      showAlert('✅ Bienvenido', `Hola ${data.user.nombre} 👋`);
+      router.replace('/(tabs)/pedidos');
+    } catch (error) {
+      showAlert('🚫 Error de conexión', 'No se pudo conectar al servidor.');
     } finally {
       setLoading(false);
     }
@@ -42,7 +56,7 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Iniciar sesión</Text>
+      <Text style={styles.title}>🔐 Login</Text>
 
       <TextInput
         style={styles.input}
@@ -52,7 +66,6 @@ export default function Login() {
         value={email}
         onChangeText={setEmail}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Contraseña"
@@ -61,41 +74,34 @@ export default function Login() {
         onChangeText={setPassword}
       />
 
-      <Button
-        title={loading ? 'Ingresando…' : 'Iniciar sesión'}
-        onPress={onLogin}
-        disabled={loading}
-        color="#0a84ff"
-      />
+      <TouchableOpacity style={styles.button} onPress={onLogin} disabled={loading}>
+        <Text style={styles.buttonText}>{loading ? 'Ingresando...' : 'Iniciar sesión'}</Text>
+      </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/register')} style={{ marginTop: 16 }}>
-        <Text style={{ textAlign: 'center', color: '#0a84ff' }}>
-          ¿No tienes cuenta? Regístrate
-        </Text>
+      <TouchableOpacity onPress={() => router.push('/register')}>
+        <Text style={styles.link}>¿No tienes cuenta? Regístrate 📝</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-    gap: 12,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
+  container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#fff' },
+  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#ccc',
     borderRadius: 10,
     padding: 12,
-    backgroundColor: '#f7f7f7',
+    marginBottom: 12,
+    backgroundColor: '#f8f9fa',
   },
+  button: {
+    backgroundColor: '#007bff',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+  link: { marginTop: 16, color: '#007bff', textAlign: 'center' },
 });
